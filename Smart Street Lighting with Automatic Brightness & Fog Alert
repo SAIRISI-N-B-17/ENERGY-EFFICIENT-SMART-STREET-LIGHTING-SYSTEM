@@ -1,0 +1,69 @@
+#include "DHT.h"
+
+#define LDR_PIN 34
+#define LED1 25
+#define LED2 26
+#define LED3 33
+#define LED4 17  // Fog/humidity indicator LED
+#define BUZZER 32
+#define DHTPIN 27
+#define DHTTYPE DHT11
+#define BUTTON 18  // Pushbutton for manual buzzer
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+  pinMode(BUTTON, INPUT_PULLUP); // Button connected to GND
+  dht.begin();
+}
+
+void loop() {
+  int ldrValue = analogRead(LDR_PIN);
+  float humidity = dht.readHumidity();
+  bool buttonPressed = digitalRead(BUTTON) == LOW;
+
+  Serial.print("LDR Value: ");
+  Serial.print(ldrValue);
+  Serial.print(" | Humidity: ");
+  Serial.print(humidity);
+  Serial.print(" % | Button: ");
+  Serial.println(buttonPressed ? "PRESSED" : "NOT PRESSED");
+
+  // Buzzer alert via pushbutton
+  if (buttonPressed) {
+    digitalWrite(BUZZER, HIGH);  // Buzzer ON
+    Serial.println("🔔 Buzzer ON (Manual Trigger)");
+  } else {
+    digitalWrite(BUZZER, LOW);   // Buzzer OFF
+  }
+
+  // LED4 shows humidity alert only (optional visual indicator)
+  if (humidity > 85.0) {
+    digitalWrite(LED4, HIGH);
+  } else {
+    digitalWrite(LED4, LOW);
+  }
+
+  // Brightness level using LEDs
+  if (ldrValue > 3000) {
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, LOW);
+  } else if (ldrValue > 1500) {
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, HIGH);
+  } else {
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, HIGH);
+    digitalWrite(LED3, HIGH);
+  }
+
+  delay(2000);
+}
