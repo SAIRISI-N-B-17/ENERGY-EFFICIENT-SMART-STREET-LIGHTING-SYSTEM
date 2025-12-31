@@ -1,0 +1,35 @@
+#include "DHT.h"
+
+#define DHTPIN 27
+#define DHTTYPE DHT11
+#define LDR_PIN 34     // Analog pin
+#define LED_PIN 33     // Output pin for LED
+
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  // Read sensors
+  int ldrValue = analogRead(LDR_PIN);  // LDR range: 0–4095
+  float humidity = dht.readHumidity(); // Humidity in %
+
+  // Display readings
+  Serial.print("LDR: "); Serial.print(ldrValue);
+  Serial.print(" | Humidity: "); Serial.print(humidity); Serial.println(" %");
+
+  // Decision Logic
+  if (ldrValue < 2000 || humidity > 85.0) {
+    digitalWrite(LED_PIN, HIGH);  // Turn ON LED
+    Serial.println("💡 LED ON (dark or humid)");
+  } else {
+    digitalWrite(LED_PIN, LOW);   // Turn OFF LED
+    Serial.println("🔅 LED OFF");
+  }
+
+  delay(2000); // Delay between reads
+}
